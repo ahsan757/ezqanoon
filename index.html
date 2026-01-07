@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EzQanoon - Legal Assistant</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f3f4f6;
+            --chat-bg: #ffffff;
+            --text-color: #1f2937;
+            --message-user-bg: #2563eb;
+            --message-user-text: #ffffff;
+            --message-bot-bg: #e5e7eb;
+            --message-bot-text: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background-color: var(--chat-bg);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem;
+            background-color: var(--chat-bg);
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease-out;
+            word-wrap: break-word;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background-color: var(--message-bot-bg);
+            color: var(--message-bot-text);
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--message-user-bg);
+            color: var(--message-user-text);
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .input-area {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            background-color: var(--chat-bg);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            background-color: var(--message-bot-bg);
+            border-radius: 1rem;
+            width: fit-content;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: #6b7280;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <header class="header">
+            <div class="status-dot"></div>
+            <h1>EzQanoon Assistant</h1>
+        </header>
+
+        <div class="messages-area" id="messagesArea">
+            <div class="message bot">
+                Hello! I am your legal assistant. I can search specific provincial or federal laws for you. How can I help?
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <form class="input-area" id="chatForm">
+            <input type="text" id="userInput" placeholder="Type your legal question..." autocomplete="off">
+            <button type="submit" id="sendButton">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const messagesArea = document.getElementById('messagesArea');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Generate random IDs for this session
+        const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        const chatId = 'chat_' + Math.random().toString(36).substr(2, 9);
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            
+            // Handle newlines
+            const formattedText = text.replace(/\n/g, '<br>');
+            messageDiv.innerHTML = formattedText;
+            
+            // Insert before typing indicator
+            messagesArea.insertBefore(messageDiv, typingIndicator);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = userInput.value.trim();
+            if (!query) return;
+
+            // UI Updates
+            addMessage(query, 'user');
+            userInput.value = '';
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            showTyping();
+
+            try {
+                // Determine API URL (assuming same host if served, or localhost:8007)
+                // Since this is a local file, we need absolute URL
+                const apiUrl = 'http://localhost:8007/query';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    // Query params as query string for standard FastAPI, 
+                    // BUT previous code showed @router.post("/query") with params query, user_id, chat_id
+                    // which usually implies Query parameters in FastAPI unless Body is specified.
+                    // Let's check api implementation again.
+                    // "async def query_agent(query: str, user_id: str, chat_id: str, ...)"
+                    // These are query parameters by default in FastAPI.
+                });
+
+                // Wait, if they are query parameters, I should append them to URL.
+                // Let's re-read step 64 very carefully.
+                // @router.post("/query")
+                // async def query_agent(query: str, user_id: str, chat_id: str, db...)
+                // Yes, these are Query params.
+                
+                const urlWithParams = new URL(apiUrl);
+                urlWithParams.searchParams.append('query', query);
+                urlWithParams.searchParams.append('user_id', userId);
+                urlWithParams.searchParams.append('chat_id', chatId);
+
+                const res = await fetch(urlWithParams, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await res.json();
+                hideTyping();
+
+                if (data.answer) {
+                    addMessage(data.answer, 'bot');
+                } else {
+                    addMessage('Error: No answer received.', 'bot');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                addMessage('Sorry, something went wrong. Is the server running?', 'bot');
+            } finally {
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

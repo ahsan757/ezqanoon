@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.*
+
+# Virtual environment
+venv/
+env/
+.venv/
+.ENV/
+
+# VSCode
+.vscode/
+
+# macOS and system files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# User conversations or cached responses
+user_conversations/
+
+# Test coverage and reports
+htmlcov/
+coverage.*
+.cache
+
+# Pytest
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+dist/
+build/
+*.egg-info/
