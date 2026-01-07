@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 from app.api.chat import router as chat_router
 from app.db.database import engine
@@ -19,6 +20,10 @@ app.add_middleware(
 
 # Create database tables (for simple setups; for production, prefer migrations)
 Base.metadata.create_all(bind=engine)
+
+@app.get("/")
+async def read_root():
+    return FileResponse("index.html")
 
 app.include_router(chat_router)
 
