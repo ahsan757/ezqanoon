@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     GBA_VECTOR_STORE_ID: str
     NATIONAL_VECTOR_STORE_ID: str
     FEDERAL_VECTOR_STORE_ID:str
+    
+    # API URL for frontend
+    API_URL: str
 
     if SettingsConfigDict:
         # Pydantic v2 syntax

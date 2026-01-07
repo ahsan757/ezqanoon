@@ -5,6 +5,7 @@ from app.api.chat import router as chat_router
 from app.db.database import engine
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.models import Base
+from app.config.settings import settings
 
 print("🚀 Starting EzQanoon Statute Bot...")
 print("📦 Loading FastAPI application...")
@@ -24,6 +25,10 @@ Base.metadata.create_all(bind=engine)
 @app.get("/")
 async def read_root():
     return FileResponse("index.html")
+
+@app.get("/config")
+async def get_config():
+    return {"apiUrl": settings.API_URL}
 
 app.include_router(chat_router)
 

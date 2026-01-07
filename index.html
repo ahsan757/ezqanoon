@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -142,8 +143,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Typing indicator */
@@ -166,15 +174,29 @@
             animation: bounce 1.4s infinite ease-in-out both;
         }
 
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
 
         @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="chat-container">
         <header class="header">
@@ -184,7 +206,8 @@
 
         <div class="messages-area" id="messagesArea">
             <div class="message bot">
-                Hello! I am your legal assistant. I can search specific provincial or federal laws for you. How can I help?
+                Hello! I am your legal assistant. I can search specific provincial or federal laws for you. How can I
+                help?
             </div>
             <div class="typing-indicator" id="typingIndicator">
                 <div class="dot"></div>
@@ -213,11 +236,11 @@
         function addMessage(text, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
-            
+
             // Handle newlines
             const formattedText = text.replace(/\n/g, '<br>');
             messageDiv.innerHTML = formattedText;
-            
+
             // Insert before typing indicator
             messagesArea.insertBefore(messageDiv, typingIndicator);
             scrollToBottom();
@@ -249,29 +272,11 @@
             showTyping();
 
             try {
-                // Determine API URL (assuming same host if served, or localhost:8007)
-                // Since this is a local file, we need absolute URL
-                const apiUrl = 'http://localhost:8007/query';
+                // Determine API URL by fetching config
+                const configResponse = await fetch('/config');
+                const config = await configResponse.json();
+                const apiUrl = config.apiUrl;
 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    // Query params as query string for standard FastAPI, 
-                    // BUT previous code showed @router.post("/query") with params query, user_id, chat_id
-                    // which usually implies Query parameters in FastAPI unless Body is specified.
-                    // Let's check api implementation again.
-                    // "async def query_agent(query: str, user_id: str, chat_id: str, ...)"
-                    // These are query parameters by default in FastAPI.
-                });
-
-                // Wait, if they are query parameters, I should append them to URL.
-                // Let's re-read step 64 very carefully.
-                // @router.post("/query")
-                // async def query_agent(query: str, user_id: str, chat_id: str, db...)
-                // Yes, these are Query params.
-                
                 const urlWithParams = new URL(apiUrl);
                 urlWithParams.searchParams.append('query', query);
                 urlWithParams.searchParams.append('user_id', userId);
@@ -305,4 +310,5 @@
         });
     </script>
 </body>
+
 </html>
