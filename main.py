@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.models import Base
 from app.config.settings import settings
 
+
 print("🚀 Starting EzQanoon Statute Bot...")
 print("📦 Loading FastAPI application...")
 
@@ -22,7 +23,8 @@ app.add_middleware(
 # Create database tables (for simple setups; for production, prefer migrations)
 Base.metadata.create_all(bind=engine)
 
-@app.get("/")
+
+@app.post("/")
 async def read_root():
     return FileResponse("index.html")
 
