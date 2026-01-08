@@ -24,7 +24,7 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 
-@app.post("/")
+@app.get("/")
 async def read_root():
     return FileResponse("index.html")
 
